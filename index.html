@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>YouTube 대본 생성 MVP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --gap:12px; --border:#ddd; --bg:#fff; --text:#111; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Apple SD Gothic Neo,Noto Sans KR,Arial,sans-serif; color:var(--text); background:#fafafa; }
+    header, footer { padding:14px 16px; border-bottom:1px solid var(--border); background:var(--bg); }
+    header h1 { margin:0; font-size:18px; }
+    main { display:grid; grid-template-columns: 1fr 300px; gap:var(--gap); padding:var(--gap); }
+    section { background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:var(--gap); }
+    h2 { margin:0 0 8px; font-size:16px; }
+    label { font-size:13px; color:#333; }
+    textarea, input[type="text"] {
+      width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; font:inherit; background:#fff;
+    }
+    textarea { min-height:140px; resize:vertical; }
+    button {
+      padding:8px 12px; border:1px solid #000; background:#000; color:#fff; border-radius:4px; cursor:pointer; font:inherit;
+    }
+    button.secondary { background:#fff; color:#000; }
+    button.ghost { background:#fff; color:#000; border-color:#aaa; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .stack { display:flex; flex-direction:column; gap:8px; }
+    .topics { display:flex; flex-direction:column; gap:6px; border:1px dashed #ccc; padding:8px; border-radius:6px; background:#fcfcfc; max-height:200px; overflow:auto; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .list { display:flex; flex-direction:column; gap:6px; max-height:60vh; overflow:auto; }
+    .item { padding:8px; border:1px solid var(--border); border-radius:4px; background:#fff; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .muted { color:#666; font-size:12px; }
+    .right { text-align:right; }
+    .hidden { display:none; }
+    .danger { color:#b00020; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>유튜브 대본 생성 MVP (로컬 저장)</h1>
+  </header>
+
+  <main>
+    <!-- 좌측: 작업 영역 -->
+    <section class="stack" id="work">
+      <div class="stack">
+        <label for="projectName">프로젝트 이름 (저장용)</label>
+        <input id="projectName" type="text" placeholder="예: 아이폰 16 리뷰 전환각" />
+      </div>
+
+      <div class="stack">
+        <div class="row" style="justify-content:space-between;">
+          <h2>1) 원본 대본 입력</h2>
+          <span class="muted">비어있으면 주제 추천 불가</span>
+        </div>
+        <textarea id="original" placeholder="영상에 사용했던 기존 대본을 붙여넣으세요."></textarea>
+        <div class="actions">
+          <button id="btnSuggest">주제 추천</button>
+          <button class="secondary" id="btnClearInput">입력 비우기</button>
+        </div>
+      </div>
+
+      <div class="stack">
+        <h2>2) 추천 주제 선택</h2>
+        <div id="topics" class="topics"></div>
+        <div class="actions">
+          <button id="btnGenerate">이 주제로 새 대본 작성</button>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="row" style="justify-content:space-between;">
+          <h2>3) 생성된 새 대본</h2>
+          <span class="muted">편집 가능</span>
+        </div>
+        <textarea id="generated" class="mono" placeholder="여기에 새 대본이 생성됩니다."></textarea>
+        <div class="actions">
+          <button id="btnCopy">복사</button>
+          <button class="secondary" id="btnDownload">다운로드 .txt</button>
+          <button class="ghost" id="btnInsertCTA">콜투액션 문구 삽입</button>
+        </div>
+      </div>
+
+      <div class="stack">
+        <h2>4) 저장/불러오기</h2>
+        <div class="actions">
+          <button id="btnSave">저장</button>
+          <button class="secondary" id="btnNew">새 프로젝트</button>
+          <button class="ghost" id="btnExport">내보내기(JSON)</button>
+          <input type="file" id="importFile" accept="application/json" class="hidden" />
+          <button class="ghost" id="btnImport">가져오기(JSON)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 우측: 저장 목록 -->
+    <section id="sidebar" class="stack">
+      <div class="row" style="justify-content:space-between;">
+        <h2>저장된 프로젝트</h2>
+        <button class="ghost" id="btnPurge"><span class="danger">전체삭제</span></button>
+      </div>
+      <div id="projectList" class="list"></div>
+      <p class="muted">브라우저(LocalStorage)에 저장됩니다. 브라우저/기기 바꾸면 보이지 않을 수 있습니다.</p>
+    </section>
+  </main>
+
+  <footer class="right muted">
+    v1.0 — 브라우저 전용 / 서버 불필요
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
